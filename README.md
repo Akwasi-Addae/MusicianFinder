@@ -1,1 +1,1 @@
-Main directory for mobile application that allows churches to hire musicians.
+Mobile application that allows churches to hire musicians.
