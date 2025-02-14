@@ -4,6 +4,15 @@ import { StatusBar } from 'expo-status-bar';
 import { Client, Account, ID } from 'react-native-appwrite';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 
+let client;
+let account;
+
+client = new Client()
+  .setEndpoint("")
+  .setProject("")
+
+account = new Account(client);
+
 const Login = ({navigation}) => {
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [email, setEmail] = useState('');
@@ -11,9 +20,28 @@ const Login = ({navigation}) => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const login = async (email, password) => {
+    setLoading(true);
+    try{
+      await account.createEmailPasswordSession(email, password);
+      setLoggedInUser(await account.get());
+      Alert.alert('Success', 'User login succesful');
+      navigation.navigate('Home');
+    } catch (error) {
+      console.log('Error logging in user:', error);
+      Alert.alert('Error', error.message || 'Failed to login user.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <StatusBar barStyle="light-content" />
+      {/* <Text>
+        {loggedInUser ? `Logged in as ${loggedInUser.name}` : 'Not logged in'}
+      </Text> */}
       <View style={styles.logo}>
         <Avatar
           size={120}
@@ -49,6 +77,14 @@ const Login = ({navigation}) => {
 
       <TouchableOpacity style={styles.loginButton} onPress={() => login(email, password)}>
         <Text style={styles.loginText}>{loading ? 'Logging In...' : 'Log In'}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+        <Text style={styles.signUpText}>Sign Up</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
   );
@@ -87,6 +123,29 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     backgroundColor: '#FFF',
+  },
+  loginButton: {
+    width: '80%', // Match input field width
+    backgroundColor: '#3B5998', // Facebook blue color
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  loginText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  signUpText: {
+    color: '#3B5998',
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  forgotPasswordText: {
+    color: '#3B5998',
+    marginTop: 5,
+    textDecorationLine: 'underline', // Underline for a link effect
   },
 });
 
