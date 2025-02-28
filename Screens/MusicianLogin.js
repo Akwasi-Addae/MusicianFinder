@@ -26,7 +26,27 @@ const MusicianLogin = ({route, navigation}) => {
   const toggleSwitch = () => setMale((previousState) => !previousState);
 
   const createUserProfile = async() => {
-    console.log(organ);    
+    console.log(organ);
+    const selectedDatabaseId = organ ? "66ad037800176f5a7a4e" : "66ad038300359c087531";
+
+    try{
+      const response = await databases.createDocument(
+        "66ad03710020e0678318",
+        selectedDatabaseId,
+        ID.unique(),
+        {"Name" : firstName+' '+lastName,
+         "Zip" : 11691,
+        "Gender" : isMale,
+        "Email" : email,
+        "Phone" : num},
+      );
+
+      navigation.navigate("HomeScreen");
+    } catch(error) {
+      console.log(error);
+    }finally{
+      console.log(error);
+    }
   };
 
   return (
@@ -57,6 +77,34 @@ const MusicianLogin = ({route, navigation}) => {
           placeholderTextColor="#888" // Placeholder text color for better UX
         />
       </View>
+
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Do you play the organ?</Text>
+        <Switch
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={organ ? '#f5dd4b' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggle}
+          value={organ}
+          style={styles.switch}
+        />
+      </View>
+
+      <View style={styles.switchContainer}>
+        <Text style={styles.label}>Are you male?</Text>
+        <Switch
+          trackColor={{ false: '#767577', true: '#81b0ff' }}
+          thumbColor={isMale ? '#f5dd4b' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isMale}
+          style={styles.switch}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.loginButton} onPress={() => createUserProfile()}>
+        <Text style={styles.loginText}>Setup Profile</Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
@@ -102,6 +150,44 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     fontSize: 16,
     color: '#333',
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '80%',
+    marginBottom: 20,
+    paddingHorizontal: 10,
+  },
+  label: {
+    fontSize: 16,
+    color: '#333',
+  },
+  switch: {
+    transform: [{ scaleX: 1.2 }, { scaleY: 1.2 }], // Increase switch size
+  },
+  loginButton: {
+    width: '80%', // Match input field width
+    backgroundColor: '#3B5998', // Facebook blue color
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  loginText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 18,
+  },
+  signUpText: {
+    color: '#3B5998',
+    fontWeight: 'bold',
+    marginTop: 10,
+  },
+  forgotPasswordText: {
+    color: '#3B5998',
+    marginTop: 5,
+    textDecorationLine: 'underline', // Underline for a link effect
   },
 });
 
