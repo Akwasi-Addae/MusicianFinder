@@ -8,8 +8,9 @@ let client;
 let account;
 
 client = new Client()
-  .setEndpoint("")
-  .setProject("")
+  .setEndpoint("https://cloud.appwrite.io/v1")
+  .setProject("66a7b00c002771952cb7")
+  // .setPlatform('com.example.KeyboardAssistant');
 
 account = new Account(client);
 
@@ -23,10 +24,16 @@ const Login = ({navigation}) => {
   const login = async (email, password) => {
     setLoading(true);
     try{
+      await account.deleteSession('current');
+    } catch (error) {
+      console.log('Test');
+    }
+
+    try{
       await account.createEmailPasswordSession(email, password);
       setLoggedInUser(await account.get());
       Alert.alert('Success', 'User login succesful');
-      navigation.navigate('Home');
+      navigation.navigate('MusicianTabs', { screen: 'HomeScreen' });
     } catch (error) {
       console.log('Error logging in user:', error);
       Alert.alert('Error', error.message || 'Failed to login user.');
@@ -39,9 +46,9 @@ const Login = ({navigation}) => {
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <StatusBar barStyle="light-content" />
-      {/* <Text>
+      <Text>
         {loggedInUser ? `Logged in as ${loggedInUser.name}` : 'Not logged in'}
-      </Text> */}
+      </Text>
       <View style={styles.logo}>
         <Avatar
           size={120}
