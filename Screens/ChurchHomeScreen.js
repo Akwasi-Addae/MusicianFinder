@@ -17,7 +17,33 @@ const ChurchHomeScreen = ({ navigation }) => {
           rounded
           source={require('../assets/splash.png')}
         />
-  
+        <Text style={styles.churchName}>{churchName}</Text>
+        <Text style={styles.subtext}>{city}, {state}</Text>
+        <Text style={styles.subtext}>Welcome, {contactPerson}</Text>
+      </View>
+
+      <View style={styles.buttonGroup}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('CreateGig')}
+        >
+          <Text style={styles.buttonText}>➕ Create New Gig</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('MyGigs')}
+        >
+          <Text style={styles.buttonText}>📋 View My Gigs</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => navigation.navigate('EditProfile')}
+        >
+          <Text style={styles.buttonText}>⚙️ Manage Profile</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -32,6 +58,32 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  churchName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginTop: 10,
+    color: '#3B5998',
+  },
+  subtext: {
+    fontSize: 16,
+    color: '#555',
+  },
+  buttonGroup: {
+    width: '100%',
+  },
+  button: {
+    backgroundColor: '#3B5998',
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 
