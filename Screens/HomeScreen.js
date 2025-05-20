@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   Switch,
   ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { Button, Card, SearchBar, Avatar } from '@rneui/themed';
 import { StatusBar } from 'expo-status-bar';
@@ -18,7 +19,7 @@ import { databases } from '../lib/appwrite';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 
 const radiusOptions = [5, 10, 20];
-const instrumentOptions = ['Guitar', 'Drums', 'Keys', 'Vocals'];
+const instrumentOptions = ['Guitar', 'Drums', 'Piano', 'Vocals'];
 const orgTypeOptions = ['Church', 'Bar', 'Other'];
 
 const COLLECTION_IDS = {
@@ -51,6 +52,7 @@ const HomeScreen = ({ navigation }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const fetchAllGigs = async () => {
     setLoading(true);
@@ -59,7 +61,10 @@ const HomeScreen = ({ navigation }) => {
       for (const [type, id] of Object.entries(COLLECTION_IDS)) {
         const response = await databases.listDocuments('68212fc200168f50228f', id);
         allDocs.push(...response.documents.map(doc => ({ ...doc, Type: type })));
+        console.log('Sample gig:', response.documents);
       }
+      console.log("");
+      console.log("");
       setAllGigs(allDocs);
       filterGigs(allDocs);
     } catch (err) {
@@ -67,6 +72,7 @@ const HomeScreen = ({ navigation }) => {
       setFiltered([]);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -202,6 +208,7 @@ const HomeScreen = ({ navigation }) => {
         <FlatList
           data={filtered}
           keyExtractor={item => item.$id}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchAllGigs(); }} />}
           renderItem={({ item }) => (
             <Card
               containerStyle={[
@@ -216,7 +223,20 @@ const HomeScreen = ({ navigation }) => {
               ]}
             >
               <TouchableOpacity
-                onPress={() => navigation.navigate('ChurchInfo', item)}
+                onPress={() => navigation.navigate('ChurchInfo', {name: item.Name,
+                  zip: item.Zip,
+                  city: item.StreetAddress, // or pull this from your database if available
+                  state: item.State,     // default or database-provided
+                  contactName: 'Jane Doe',  // hardcoded or fetched
+                  contactRole: 'Worship Leader',
+                  contactEmail: item.Email,
+                  contactPhone: item.Num,
+                  gigDate: new Date(item.Date).toLocaleDateString(), // format as needed
+                  gigTime: new Date(item.Date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  instruments: item.Instrument,
+                  pay: `$${item.Compensation}`,
+                  details: item.Details
+                })}
                 style={{ flexDirection: 'row', alignItems: 'center' }}
                 activeOpacity={0.7}
               >
@@ -234,15 +254,12 @@ const HomeScreen = ({ navigation }) => {
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
                     <Ionicons name="location-outline" size={14} color="#888" />
-                    <Text style={theme.churchDetails}> {item.State} • Zip {item.Zip}</Text>
+                    <Text style={theme.churchDetails}> {item.State} • {item.Zip} •   ${item.Compensation}</Text>
                   </View>
 
                   <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2 }}>
                     <MaterialCommunityIcons name="music-note-outline" size={14} color="#4ADE80" />
-                    <Text style={theme.instrumentTag}>
-                      {' '}
-                      {item.Instruments?.join(', ') || 'Any Instrument'}
-                    </Text>
+                    <Text style={theme.instrumentTag}>{item.Instrument}</Text>
                   </View>
                 </View>
 
