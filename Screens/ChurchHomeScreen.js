@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Avatar } from '@rneui/themed';
+import { UserContext } from '../contexts/UserContext';
+import { databases } from '../lib/appwrite'; // adjust import if needed
 
 const ChurchHomeScreen = ({ navigation }) => {
   // You can pass actual church data from login or database later
-  const churchName = 'St. Luke’s Baptist Church';
-  const contactPerson = 'Jane Doe';
-  const city = 'Albany';
-  const state = 'NY';
+  const { user } = useContext(UserContext);
+  const church = user?.church;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -17,9 +17,9 @@ const ChurchHomeScreen = ({ navigation }) => {
           rounded
           source={require('../assets/splash.png')}
         />
-        <Text style={styles.churchName}>{churchName}</Text>
-        <Text style={styles.subtext}>{city}, {state}</Text>
-        <Text style={styles.subtext}>Welcome, {contactPerson}</Text>
+        <Text style={styles.churchName}>{church?.name}</Text>
+        <Text style={styles.subtext}>{church?.city}, {church?.state}</Text>
+        <Text style={styles.subtext}>Welcome, {user?.name}</Text>
       </View>
 
       <View style={styles.buttonGroup}>
