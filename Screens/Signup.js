@@ -24,6 +24,7 @@ const Signup = ({navigation}) => {
           <Text style={styles.title}>Create New Account</Text>
         </View>
 
+        {/* First Name */}
         <View style={styles.inputContainer}>
           <TextInput 
             style={styles.input} 
@@ -34,6 +35,7 @@ const Signup = ({navigation}) => {
             
         </View>
 
+        {/* Last Name */}
         <View style={styles.inputContainer}>
           <TextInput 
             style={styles.input} 
