@@ -1,20 +1,66 @@
 import { Avatar } from '@rneui/themed';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { ID } from 'appwrite';
+import { account } from "../lib/appwrite";
+import { UserContext } from '../contexts/UserContext';
 
 const SignupTwo = ({ route, navigation }) => {
   const { firstName, lastName, num } = route.params;
-  const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false); // State to track loading
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const { setUser } = useContext(UserContext);
+
+  const register = async () => {
+    setLoading(true);
+    // Close any active sessions
+    try{
+      await account.deleteSession('current');
+    } catch (error) {
+      console.log('Error clearing session:', error);
+    }
+
+    // Create account
+    try {
+      const user = await account.create(ID.unique(), email, password, firstName);
+      await account.createEmailPasswordSession(email, password);
+      const userData = await account.get();
+
+      setUser({ id: userData.$id, name: userData.name, email: userData.email, });
+
+      Alert.alert('Success', 'Account created successfully!');
+      navigation.navigate('Home', {firstName: firstName, lastName: lastName, num: num, email: email}); // Assuming Home reads from UserContext
+    } catch (error) {
+      // console.error('Error creating user:', error);
+      // Alert.alert('Error', error.message || 'Failed to create account.');
+      if (error.message == "A user with the same id, email, or phone already exists in this project."){
+        console.log("Same user info");
+        Alert.alert('Error', error.message, [
+          {text: 'Ok', onPress: () => console.log('Ok Pressed')}, 
+          {text: 'Login', onPress: () => navigation.navigate("Login")}
+        ]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
       <StatusBar barStyle="light-content" />
       <View style={styles.logo}>
-        <Avatar size={120} rounded source={require('../assets/splash.png')}/>
+        <Avatar size={120} rounded source={require('../assets/splash.png')} />
+      </View>
+
+      <View style={styles.words}>
+        <Text style={styles.title}>Create New Account</Text>
+        <Text>First Name: {firstName}</Text>
+        <Text>Last Name: {lastName}</Text>
+        <Text>Phone Number: {num}</Text>
       </View>
 
       <View style={styles.inputContainer}>
@@ -47,6 +93,12 @@ const SignupTwo = ({ route, navigation }) => {
           placeholder="Password"
         />
       </View>
+
+      <TouchableOpacity onPress={register} disabled={loading}>
+        <View style={styles.loginButton}>
+          <Text style={styles.loginText}>{loading ? 'Creating Account...' : 'Create Account'}</Text>
+        </View>
+      </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.goBack()} disabled={loading}>
         <Text style={styles.signUpText}>Back</Text>
