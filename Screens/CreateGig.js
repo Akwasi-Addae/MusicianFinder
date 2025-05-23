@@ -51,7 +51,7 @@ const CreateGig = ({ navigation }) => {
   const formatDateTimeForAppwrite = (date) => date.toISOString();
 
   const createGig = async () => {
-    if (!title || !date) {
+    if (!title || !date || !pay) {
       Alert.alert('Error', 'Please fill out the required fields');
       return;
     }
@@ -67,15 +67,16 @@ const CreateGig = ({ navigation }) => {
           title,
           description,
           createdBy: user.name,
-          churchId: church?.churchId,
+          churchId: [church?.id],  // If not array, we get error "Error creating gig: [AppwriteException: Invalid relationship value. Must be either an array of documents or document IDs, document ID given.]"
+          churchIdStr: church?.id,
           type: church?.type || "Church",
           location: church?.StreetAddress,
           date: formatDateTimeForAppwrite(date),
         },
         [
-          Permission.read(Role.user(user.$id)),
-          Permission.update(Role.user(user.$id)),
-          Permission.delete(Role.user(user.$id)),
+          Permission.read(Role.user(user.id)),
+          Permission.update(Role.user(user.id)),
+          Permission.delete(Role.user(user.id)),
         ]
       );
 
