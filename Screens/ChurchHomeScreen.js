@@ -32,13 +32,6 @@ const ChurchHomeScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate('MyGigs')}
-        >
-          <Text style={styles.buttonText}>📋 View My Gigs</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.button}
           onPress={() => navigation.navigate('EditProfile')}
         >
           <Text style={styles.buttonText}>⚙️ Manage Profile</Text>
