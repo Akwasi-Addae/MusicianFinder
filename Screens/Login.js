@@ -14,36 +14,53 @@ const Login = ({ navigation }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      // Clear any existing session
       await account.deleteSession('current');
     } catch (error) {
       console.log('No existing session to clear:', error.message);
     }
 
     try {
-      // Create new email/password session
       await account.createEmailPasswordSession(email, password);
 
-      // Fetch the logged-in user's data
       const user = await account.get();
-      setUser(user);
 
-      // Check if the user exists in the Church collection
+      // Fetch the church document
       const databaseId = "66ad03710020e0678318";
       const churchCollectionId = "66ad037e0022cc74d1f3";
 
       const churchRes = await databases.listDocuments(
         databaseId,
         churchCollectionId,
-        [Query.equal('Email', email)] // Field name must match exactly
+        [Query.equal('Email', email)]
       );
 
+      let church = null;
       if (churchRes.documents.length > 0) {
+        const ch = churchRes.documents[0];
+        church = {
+          id: ch.$id,
+          name: ch.Name,
+          city: ch.City,
+          state: ch.State,
+          zip: ch.Zip,
+          address: ch.StreetAddress,
+          email: ch.Email,
+          userId: ch.userId,
+          type: ch.type,
+        };
+      }
+
+      // Attach church info to user context
+      setUser({
+        ...user,
+        church,
+      });
+
+      if (church) {
         navigation.navigate('ChurchTabs', { screen: 'ChurchHome' });
       } else {
         navigation.navigate('MusicianTabs', { screen: 'HomeScreen' });
       }
-
     } catch (error) {
       console.log('Error logging in user:', error);
       Alert.alert('Error', error.message || 'Failed to login user.');
@@ -51,6 +68,7 @@ const Login = ({ navigation }) => {
       setLoading(false);
     }
   };
+
 
 
   return (
