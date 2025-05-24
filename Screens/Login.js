@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { useUser } from '../contexts/UserContext'; // Import useUser
-import { account, Query, databases } from '../lib/appwrite'; // Import appwrite account
+import { useUser } from '../contexts/UserContext';
+import { account, databases, Query } from '../lib/appwrite';
 import { StatusBar } from 'expo-status-bar';
 import { Avatar } from '@rneui/themed';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Alert,
+} from 'react-native';
 
 const Login = ({ navigation }) => {
-  const { setUser } = useUser(); // Access setUser from context
+  const { setUser, refreshUser } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,49 +23,16 @@ const Login = ({ navigation }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      await account.deleteSession('current');
-    } catch (error) {
-      console.log('No existing session to clear:', error.message);
-    }
+      // Clear any existing session
+      await account.deleteSession('current').catch(() => {});
 
-    try {
+      // Create new session
       await account.createEmailPasswordSession(email, password);
 
-      const user = await account.get();
+      // Refresh user context, which also fetches church data
+      const updatedUser = await refreshUser();
 
-      // Fetch the church document
-      const databaseId = "66ad03710020e0678318";
-      const churchCollectionId = "66ad037e0022cc74d1f3";
-
-      const churchRes = await databases.listDocuments(
-        databaseId,
-        churchCollectionId,
-        [Query.equal('Email', email)]
-      );
-
-      let church = null;
-      if (churchRes.documents.length > 0) {
-        const ch = churchRes.documents[0];
-        church = {
-          id: ch.$id,
-          name: ch.Name,
-          city: ch.City,
-          state: ch.State,
-          zip: ch.Zip,
-          address: ch.StreetAddress,
-          email: ch.Email,
-          userId: ch.userId,
-          type: ch.type,
-        };
-      }
-
-      // Attach church info to user context
-      setUser({
-        ...user,
-        church,
-      });
-
-      if (church) {
+      if (updatedUser?.church) {
         navigation.navigate('ChurchTabs', { screen: 'ChurchHome' });
       } else {
         navigation.navigate('MusicianTabs', { screen: 'HomeScreen' });
@@ -69,10 +45,11 @@ const Login = ({ navigation }) => {
     }
   };
 
-
-
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <StatusBar barStyle="light-content" />
       <View style={styles.logo}>
         <Avatar size={120} rounded source={require('../assets/splash.png')} />
@@ -88,6 +65,8 @@ const Login = ({ navigation }) => {
           style={styles.input}
           placeholder="Email"
           onChangeText={setEmail}
+          autoCapitalize="none"
+          keyboardType="email-address"
         />
       </View>
 
@@ -101,7 +80,11 @@ const Login = ({ navigation }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => login(email, password)}>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => login(email.trim(), password)}
+        disabled={loading}
+      >
         <Text style={styles.loginText}>{loading ? 'Logging In...' : 'Log In'}</Text>
       </TouchableOpacity>
 
