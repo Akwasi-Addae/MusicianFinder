@@ -1,7 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import account from '../lib/appwrite';
+import { account, databases, Query } from '../lib/appwrite';
 
-// Create the context
 export const UserContext = createContext({
   user: null,
   setUser: () => {},
@@ -9,49 +8,69 @@ export const UserContext = createContext({
   refreshUser: async () => {},
 });
 
-// Provider component
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-  // Load user session on mount
   useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const session = await account.get();
-        setUser({
-          id: session.$id,
-          name: session.name,
-          email: session.email,
-        });
-      } catch {
-        setUser(null);
-      }
-    };
-
-    loadUser();
+    refreshUser();
   }, []);
 
-  // Logout function
+  const fetchChurchForUser = async (email) => {
+    try {
+      const databaseId = '66ad03710020e0678318';
+      const churchCollectionId = '66ad037e0022cc74d1f3';
+
+      const res = await databases.listDocuments(databaseId, churchCollectionId, [
+        Query.equal('Email', email),
+      ]);
+
+      if (res.documents.length > 0) {
+        const ch = res.documents[0];
+        return {
+          id: ch.$id,
+          name: ch.Name,
+          city: ch.City,
+          state: ch.State,
+          zip: ch.Zip,
+          address: ch.StreetAddress,
+          email: ch.Email,
+          userId: ch.userId,
+          type: ch.type,
+        };
+      }
+      return null;
+    } catch (e) {
+      console.warn('Error fetching church:', e);
+      return null;
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      const current = await account.get();
+
+      const church = await fetchChurchForUser(current.email);
+
+      const updatedUser = {
+        id: current.$id,
+        name: current.name,
+        email: current.email,
+        church,
+      };
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (e) {
+      setUser(null);
+      return null;
+    }
+  };
+
   const logout = async () => {
     try {
       await account.deleteSession('current');
     } catch (err) {
       console.warn('Logout failed:', err);
     } finally {
-      setUser(null);
-    }
-  };
-
-  // Refresh user data
-  const refreshUser = async () => {
-    try {
-      const current = await account.get();
-      setUser({
-        id: current.$id,
-        name: current.name,
-        email: current.email,
-      });
-    } catch {
       setUser(null);
     }
   };
@@ -63,5 +82,4 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-// Custom hook for easy context access
 export const useUser = () => useContext(UserContext);
