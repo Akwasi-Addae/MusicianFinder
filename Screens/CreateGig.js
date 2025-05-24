@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,10 @@ import {
 } from 'react-native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { databases, ID, Permission, Role } from '../lib/appwrite';
-import { UserContext } from '../contexts/UserContext';
+import { useUser } from '../contexts/UserContext';
 
 const CreateGig = ({ navigation }) => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();  // use custom hook for user context
   const church = user?.church;
 
   const [title, setTitle] = useState('');
@@ -25,13 +25,8 @@ const CreateGig = ({ navigation }) => {
   const [pickerMode, setPickerMode] = useState(null); // 'date' or 'time'
   const [loading, setLoading] = useState(false);
 
-  const showPicker = (mode) => {
-    setPickerMode(mode);
-  };
-
-  const hidePicker = () => {
-    setPickerMode(null);
-  };
+  const showPicker = (mode) => setPickerMode(mode);
+  const hidePicker = () => setPickerMode(null);
 
   const handleConfirm = (selected) => {
     const newDate = new Date(date);
@@ -55,22 +50,27 @@ const CreateGig = ({ navigation }) => {
       Alert.alert('Error', 'Please fill out the required fields');
       return;
     }
+    if (!church?.id) {
+      Alert.alert('Error', 'No church associated with this user. Please login again.');
+      return;
+    }
 
     setLoading(true);
+
     try {
       const response = await databases.createDocument(
         '66ad03710020e0678318',
         '682f1d14003bda54b7f8',
         ID.unique(),
         {
-          pay: parseInt(pay),
+          pay: parseInt(pay, 10),
           title,
           description,
           createdBy: user.name,
-          churchId: [church?.id],  // If not array, we get error "Error creating gig: [AppwriteException: Invalid relationship value. Must be either an array of documents or document IDs, document ID given.]"
-          churchIdStr: church?.id,
-          type: church?.type || "Church",
-          location: church?.StreetAddress,
+          churchId: [church.id],  // array for relationship field in Appwrite
+          churchIdStr: church.id,
+          type: church.type || 'Church',
+          location: church.StreetAddress,
           date: formatDateTimeForAppwrite(date),
         },
         [
@@ -81,6 +81,7 @@ const CreateGig = ({ navigation }) => {
       );
 
       console.log('Gig created:', response);
+      Alert.alert('Success', 'Gig created successfully!');
       navigation.goBack();
     } catch (error) {
       console.error('Error creating gig:', error);
@@ -91,7 +92,10 @@ const CreateGig = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.heading}>Create New Gig</Text>
 
@@ -106,7 +110,6 @@ const CreateGig = ({ navigation }) => {
           <Text>Select Date: {date.toDateString()}</Text>
         </TouchableOpacity>
 
-        
         <TouchableOpacity style={styles.input} onPress={() => showPicker('time')}>
           <Text>
             Select Time: {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
