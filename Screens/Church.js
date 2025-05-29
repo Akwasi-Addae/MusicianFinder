@@ -9,6 +9,7 @@ const Church = ({ route, navigation }) => {
   const { setUser } = useContext(UserContext);
   const { user } = useContext(UserContext);
   const email = user?.email;
+  const { firstName, lastName, num } = route.params;
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
@@ -32,7 +33,9 @@ const Church = ({ route, navigation }) => {
           Email: email,
           StreetAddress: address,
           Zip: parseInt(zip),
-          userId: user.id
+          userId: user.id,
+          Num: num,
+          Contact: firstName + ' ' + lastName
         },
         [
           // Set document-level permissions
