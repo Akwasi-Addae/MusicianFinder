@@ -21,6 +21,7 @@ const CreateGig = ({ navigation }) => {
   const [title, setTitle] = useState('');
   const [pay, setPay] = useState('');
   const [description, setDescription] = useState('');
+  const [instrument, setInstrument] = useState('');
   const [date, setDate] = useState(new Date());
   const [pickerMode, setPickerMode] = useState(null); // 'date' or 'time'
   const [loading, setLoading] = useState(false);
@@ -71,6 +72,7 @@ const CreateGig = ({ navigation }) => {
           churchIdStr: church.id,
           type: church.type || 'Church',
           location: church.StreetAddress,
+          Instrument: instrument,
           date: formatDateTimeForAppwrite(date),
         },
         [
@@ -130,6 +132,14 @@ const CreateGig = ({ navigation }) => {
           multiline
           value={description}
           onChangeText={setDescription}
+        />
+
+        <TextInput
+          style={[styles.input]}
+          placeholder="Instrument"
+          multiline
+          value={instrument}
+          onChangeText={setInstrument}
         />
 
         <TouchableOpacity style={styles.button} onPress={createGig} disabled={loading}>
