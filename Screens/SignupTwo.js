@@ -18,11 +18,16 @@ const SignupTwo = ({ route, navigation }) => {
   const register = async () => {
     setLoading(true);
     // Close any active sessions
-    try{
+    try {
       await account.deleteSession('current');
     } catch (error) {
-      console.log('Error clearing session:', error);
+      if (error.message.includes('missing scope')) {
+        console.log('No user session to clear — continuing.');
+      } else {
+        console.log('Error clearing session:', error);
+      }
     }
+
 
     // Create account
     try {
