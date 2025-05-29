@@ -1,9 +1,9 @@
 import { Avatar } from '@rneui/themed';
 import React, { useState } from 'react';
-import { databases } from "../lib/appwrite";
+import { databases, Query, ID, Permission, account, Role } from "../lib/appwrite";
 import { StatusBar } from 'expo-status-bar';
 import { useUser } from '../contexts/UserContext';
-import { Role, Account, Permission, ID } from 'react-native-appwrite';
+// import { Role  } from 'appwrite';
 import {
   StyleSheet,
   Text,
@@ -27,6 +27,7 @@ const MusicianLogin = ({route, navigation}) => {
 
   const createUserProfile = async() => {
     console.log(organ);
+    
     const selectedDatabaseId = organ ? "66ad037800176f5a7a4e" : "66ad038300359c087531";
 
     try{
@@ -35,13 +36,13 @@ const MusicianLogin = ({route, navigation}) => {
         selectedDatabaseId,
         ID.unique(),
         {"Name" : firstName+' '+lastName,
-         "Zip" : 11691,
+         "Zip" : parseInt(zip),
         "Gender" : isMale,
         "Email" : email,
         "Phone" : num},
       );
 
-      navigation.navigate("HomeScreen");
+      navigation.navigate("MusicianTabs");
     } catch(error) {
       console.log(error);
     }finally{
