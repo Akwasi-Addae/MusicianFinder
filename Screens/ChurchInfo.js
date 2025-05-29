@@ -20,12 +20,10 @@ const ChurchInfo = ({ route, navigation }) => {
     zip = '12208',
     city = 'Albany',
     contactName = 'Jane Doe',
-    contactRole = 'Worship Leader',
     contactEmail = 'janedoe@stlukes.org',
     contactPhone = '(123) 456-7890',
     gigDate = 'Sunday, April 20',
     gigTime = '10:30 AM',
-    gigType = 'Sunday Worship',
     instruments = 'Keyboard, Vocalist',
     pay = '$100',
     details = "Lorem ipsum"
@@ -79,7 +77,7 @@ const ChurchInfo = ({ route, navigation }) => {
       Alert.alert('Error', 'Could not open the email client');
     });
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Church Avatar and Info */}
@@ -105,11 +103,11 @@ const ChurchInfo = ({ route, navigation }) => {
       {/* Contact Info */}
       <View style={styles.card}>
         <Text style={styles.heading}>📞 Contact</Text>
-        <Text style={styles.item}>👤 {contactName} ({contactRole})</Text>
+        <Text style={styles.item}>👤 {contactName} </Text>
         <Text style={styles.item}>📧 {contactEmail}</Text>
         <Text style={styles.item}>📱 {formatPhoneNumber(contactPhone)}</Text>
       </View>
-
+      
       <View style={styles.card}>
         <Text style={styles.heading}> Additional Info </Text>
         <Text style={styles.item}> {details} </Text>
@@ -140,7 +138,7 @@ const ChurchInfo = ({ route, navigation }) => {
             <Text style={styles.optionButtonText}>📞 Call</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.optionButton} onPress={handleEmail}>
-            <Text style={styles.optionButtonText}>📧 Email</Text>
+            <Text style={styles.optionButtonText}>📧 {contactEmail}</Text>
           </TouchableOpacity>
         </Animated.View>
       )}
