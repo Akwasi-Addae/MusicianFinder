@@ -12,11 +12,12 @@ const Home = ({route, navigation}) => {
   };
 
   const nav = () => {
-    console.log(firstName);
+    // console.log(firstName);
     if (checked) {
-      navigation.navigate("MusicianLogin", {firstName: firstName, lastName: lastName, num: num, email: email})
+      navigation.navigate("MusicianLogin", 
+        {firstName: firstName, lastName: lastName, num: num, email: email});
     } else {
-      navigation.navigate("Church")
+      navigation.navigate("Church", {firstName: firstName, lastName: lastName, num: num, email: email});
     }
   };
 
