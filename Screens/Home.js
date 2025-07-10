@@ -1,54 +1,62 @@
 import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { Avatar, Switch } from '@rneui/themed';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+// import {  } from '@rneui/themed';
+import {StyleSheet, View } from 'react-native';
+import {Avatar, Text, Switch, Button, useTheme } from 'react-native-paper';
 
-
-const Home = ({route, navigation}) => {
+const Home = ({ route, navigation }) => {
+  const { colors } = useTheme();
   const [checked, setChecked] = useState(false);
   const { firstName, lastName, num, email } = route.params;
-  const toggleSwitch = () => {
-    setChecked(!checked);
-  };
 
   const nav = () => {
-    // console.log(firstName);
     if (checked) {
-      navigation.navigate("MusicianLogin", 
-        {firstName: firstName, lastName: lastName, num: num, email: email});
+      navigation.navigate('MusicianLogin', {
+        firstName,
+        lastName,
+        num,
+        email,
+      });
     } else {
-      navigation.navigate("Church", {firstName: firstName, lastName: lastName, num: num, email: email});
+      navigation.navigate('Church', {
+        firstName,
+        lastName,
+        num,
+        email,
+      });
     }
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <StatusBar style="light" />
       <View style={styles.logo}>
-          <Avatar
-            size={150}
-            rounded
-            source={require('../assets/splash.png')}
-          />
+        <Avatar.Image size={150} rounded source={require('../assets/splash.png')} />
       </View>
 
       <View style={styles.words}>
-        <Text style={styles.title}> Welcome to Keyboard Assistant,
-          the app that connects churches and musicians in an efficient manner. 
+        <Text variant="headlineSmall" style={{ color: colors.onBackground, textAlign: 'center', marginBottom: 16 }}>
+          Welcome to Keyboard Assistant, the app that connects churches and musicians in an efficient manner.
         </Text>
 
-        {/* <Text> {JSON.stringify(firstName)} </Text> */}
-        <Text style={styles.title}> If you are a musician, please turn the switch on. 
-          Otherwise, leave it off</Text>
+        <Text variant="titleMedium" style={{ color: colors.onBackground, textAlign: 'center' }}>
+          If you are a musician, please turn the switch on. Otherwise, leave it off.
+        </Text>
       </View>
 
-      <View>
-        <Switch value={checked}onValueChange={(value) => setChecked(value)}/>
+      <View style={styles.switchContainer}>
+        <Switch value={checked} onValueChange={setChecked} color={colors.primary} />
       </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => nav()}>
-        <Text style={styles.loginText}> Next </Text>
-      </TouchableOpacity>
+      <Button
+        mode="contained"
+        onPress={nav}
+        style={styles.loginButton}
+        contentStyle={{ paddingVertical: 8 }}
+        disabled={!firstName || !lastName} // optional, enable if you want to block navigation without data
+      >
+        Next
+      </Button>
     </View>
   );
 };
@@ -59,56 +67,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#FAF0E6', // Background color for the entire screen
   },
   logo: {
     marginBottom: 30,
   },
   words: {
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center', // Center the text
-  },
-  inputContainer: {
-    width: '80%', // Full width of the container for better alignment
-    marginBottom: 20,
-  },
-  input: {
-    width: '100%', // Full width to make it responsive
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 8,
+    marginVertical: 20,
     paddingHorizontal: 10,
-    backgroundColor: '#FFF',
+  },
+  switchContainer: {
+    marginVertical: 10,
   },
   loginButton: {
-    width: '80%', // Match input field width
-    backgroundColor: '#3B5998', // Facebook blue color
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+    width: '80%',
     marginTop: 20,
-  },
-  loginText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  signUpText: {
-    color: '#3B5998',
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  forgotPasswordText: {
-    color: '#3B5998',
-    marginTop: 5,
-    textDecorationLine: 'underline', // Underline for a link effect
+    borderRadius: 8,
   },
 });
 
