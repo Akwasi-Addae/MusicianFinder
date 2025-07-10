@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
   ScrollView,
-  Linking,
   Alert,
   Platform,
+  Linking,
   Animated,
   Easing,
+  KeyboardAvoidingView,
+  View,
 } from 'react-native';
-import { Avatar } from '@rneui/themed';
+import { Avatar, Button, Card, Text } from 'react-native-paper';
+import { useUser } from '../contexts/UserContext';
 
-const ChurchInfo = ({ route, navigation }) => {
+const ChurchInfo = ({ route }) => {
+  // const { user } = useUser();
   const {
     name = 'St. Luke’s Baptist Church',
     state = 'NY',
@@ -26,7 +26,7 @@ const ChurchInfo = ({ route, navigation }) => {
     gigTime = '10:30 AM',
     instruments = 'Keyboard, Vocalist',
     pay = '$100',
-    details = "Lorem ipsum"
+    details = 'Lorem ipsum',
   } = route.params || {};
 
   const [showContactOptions, setShowContactOptions] = useState(false);
@@ -77,173 +77,141 @@ const ChurchInfo = ({ route, navigation }) => {
       Alert.alert('Error', 'Could not open the email client');
     });
   };
-  
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Church Avatar and Info */}
-      <View style={styles.logo}>
-        <Avatar size={120} rounded source={require('../assets/splash.png')} />
-        <Text style={styles.churchName}>{name}</Text>
-        <Text style={styles.location}>{`${city}, ${state} ${zip}`}</Text>
-
-        <TouchableOpacity style={styles.mapButton} onPress={openMap}>
-          <Text style={styles.mapButtonText}>📍 View on Map</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Gig Details */}
-      <View style={styles.card}>
-        <Text style={styles.heading}>🎶 Gig Details</Text>
-        <Text style={styles.item}>📅 Date: {gigDate}</Text>
-        <Text style={styles.item}>🕒 Time: {gigTime}</Text>
-        <Text style={styles.item}>🎸 Instruments: {instruments}</Text>
-        <Text style={styles.item}>💵 Compensation: {pay}</Text>
-      </View>
-
-      {/* Contact Info */}
-      <View style={styles.card}>
-        <Text style={styles.heading}>📞 Contact</Text>
-        <Text style={styles.item}>👤 {contactName} </Text>
-        <Text style={styles.item}>📧 {contactEmail}</Text>
-        <Text style={styles.item}>📱 {formatPhoneNumber(contactPhone)}</Text>
-      </View>
-      
-      <View style={styles.card}>
-        <Text style={styles.heading}> Additional Info </Text>
-        <Text style={styles.item}> {details} </Text>
-      </View>
-
-      {/* Apply Button */}
-      <TouchableOpacity
-        style={styles.applyButton}
-        onPress={() => setShowContactOptions(!showContactOptions)}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          paddingVertical: 30,
+          paddingHorizontal: 20,
+          backgroundColor: '#FDF8F3',
+          alignItems: 'center',
+        }}
       >
-        <Text style={styles.applyButtonText}>
-          {showContactOptions ? 'Hide Options' : 'Apply for Gig'}
+        <Avatar.Image size={120} source={require('../assets/splash.png')} />
+        <Text
+          variant="headlineMedium"
+          style={{
+            marginTop: 16,
+            textAlign: 'center',
+            color: '#2D2D2D',
+            fontWeight: 'bold',
+          }}
+        >
+          {name}
         </Text>
-      </TouchableOpacity>
+        <Text
+          variant="bodyMedium"
+          style={{ textAlign: 'center', color: '#666', marginBottom: 12 }}
+        >
+          {`${city}, ${state} ${zip}`}
+        </Text>
+        <Button
+          mode="contained"
+          onPress={openMap}
+          style={{ marginBottom: 30, borderRadius: 8 }}
+          icon="map-marker"
+        >
+          View on Map
+        </Button>
 
-      {/* Animated Call/Email Buttons */}
-      {showContactOptions && (
-        <Animated.View
-          style={[
-            styles.optionContainer,
-            {
+        {/* Gig Details */}
+        <Card style={styles.card}>
+          <Card.Title title="🎶 Gig Details" titleStyle={styles.cardTitle} />
+          <Card.Content>
+            <Text variant="bodyMedium">📅 {gigDate}</Text>
+            <Text variant="bodyMedium">🕒 {gigTime}</Text>
+            <Text variant="bodyMedium">🎸 {instruments}</Text>
+            <Text variant="bodyMedium">💵 {pay}</Text>
+          </Card.Content>
+        </Card>
+
+        {/* Contact */}
+        <Card style={styles.card}>
+          <Card.Title title="📞 Contact" titleStyle={styles.cardTitle} />
+          <Card.Content>
+            <Text variant="bodyMedium">👤 {contactName}</Text>
+            <Text variant="bodyMedium">📧 {contactEmail}</Text>
+            <Text variant="bodyMedium">📱 {formatPhoneNumber(contactPhone)}</Text>
+          </Card.Content>
+        </Card>
+
+        {/* Additional Info */}
+        <Card style={styles.card}>
+          <Card.Title title="📝 Additional Info" titleStyle={styles.cardTitle} />
+          <Card.Content>
+            <Text variant="bodyMedium">{details}</Text>
+          </Card.Content>
+        </Card>
+
+        <Button
+          mode="contained"
+          onPress={() => setShowContactOptions(!showContactOptions)}
+          style={{
+            borderRadius: 14,
+            paddingVertical: 10,
+            paddingHorizontal: 20,
+            marginTop: 10,
+            marginBottom: showContactOptions ? 10 : 40,
+          }}
+        >
+          {showContactOptions ? 'Hide Options' : 'Apply for Gig'}
+        </Button>
+
+        {showContactOptions && (
+          <Animated.View
+            style={{
+              marginTop: 10,
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'space-between',
+              width: '100%',
               opacity: slideAnim,
               transform: [{ translateY: slideTranslate }],
-            },
-          ]}
-        >
-          <TouchableOpacity style={styles.optionButton} onPress={handleCall}>
-            <Text style={styles.optionButtonText}>📞 Call</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.optionButton} onPress={handleEmail}>
-            <Text style={styles.optionButtonText}>📧 {contactEmail}</Text>
-          </TouchableOpacity>
-        </Animated.View>
-      )}
-    </ScrollView>
+            }}
+          >
+            <Button
+              mode="contained"
+              onPress={handleCall}
+              style={styles.contactBtn}
+              icon="phone"
+            >
+              Call
+            </Button>
+            <Button
+              mode="contained"
+              onPress={handleEmail}
+              style={[styles.contactBtn]}
+              icon="email"
+            >
+              Email
+            </Button>
+          </Animated.View>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
-    backgroundColor: '#FDF8F3',
-    alignItems: 'center',
-  },
-  logo: {
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  churchName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 10,
-    color: '#2D2D2D',
-    textAlign: 'center',
-  },
-  location: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  mapButton: {
-    marginTop: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    backgroundColor: '#3B5998',
-    borderRadius: 8,
-  },
-  mapButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
+const styles = {
   card: {
     width: '100%',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOpacity: 0.08,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 8,
-    elevation: 4,
+    borderRadius: 16,
+    backgroundColor: '#FFF',
   },
-  heading: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  cardTitle: {
     color: '#3B5998',
-  },
-  item: {
-    fontSize: 16,
-    marginBottom: 6,
-    color: '#333',
-  },
-  applyButton: {
-    backgroundColor: '#3B5998',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 14,
-    marginTop: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  applyButtonText: {
-    color: '#FFF',
     fontWeight: 'bold',
-    fontSize: 18,
   },
-  optionContainer: {
-    marginTop: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    gap: 20,
-  },
-  optionButton: {
-    backgroundColor: '#8B9DC3',
-    paddingVertical: 14,
-    paddingHorizontal: 28,
+  contactBtn: {
+    flexBasis: '30%',
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 10,
   },
-  optionButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
+};
 
 export default ChurchInfo;
