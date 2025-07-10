@@ -1,23 +1,24 @@
-import { Avatar } from '@rneui/themed';
 import React, { useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { StyleSheet, View, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+// import { Avatar } from '@rneui/themed';
+import { Avatar, TextInput, Button, Text, useTheme } from 'react-native-paper';
 import { ID } from 'appwrite';
-import { account } from "../lib/appwrite";
+import { account } from '../lib/appwrite';
 import { UserContext } from '../contexts/UserContext';
 
 const SignupTwo = ({ route, navigation }) => {
   const { firstName, lastName, num } = route.params;
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState(''); // You don't currently use username in register, but it's captured here
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { setUser } = useContext(UserContext);
+  const theme = useTheme();
 
   const register = async () => {
     setLoading(true);
-    // Close any active sessions
     try {
       await account.deleteSession('current');
     } catch (error) {
@@ -28,26 +29,26 @@ const SignupTwo = ({ route, navigation }) => {
       }
     }
 
-
-    // Create account
     try {
       const user = await account.create(ID.unique(), email, password, firstName);
       await account.createEmailPasswordSession(email, password);
       const userData = await account.get();
 
-      setUser({ id: userData.$id, name: userData.name, email: userData.email, });
+      setUser({ id: userData.$id, name: userData.name, email: userData.email });
 
       Alert.alert('Success', 'Account created successfully!');
-      navigation.navigate('Home', {firstName: firstName, lastName: lastName, num: num, email: email}); // Assuming Home reads from UserContext
+      navigation.navigate('Home', { firstName, lastName, num, email }); 
     } catch (error) {
-      // console.error('Error creating user:', error);
-      // Alert.alert('Error', error.message || 'Failed to create account.');
-      if (error.message == "A user with the same id, email, or phone already exists in this project."){
-        console.log("Same user info");
+      if (
+        error.message ===
+        'A user with the same id, email, or phone already exists in this project.'
+      ) {
         Alert.alert('Error', error.message, [
-          {text: 'Ok', onPress: () => console.log('Ok Pressed')}, 
-          {text: 'Login', onPress: () => navigation.navigate("Login")}
+          { text: 'Ok', onPress: () => console.log('Ok Pressed') },
+          { text: 'Login', onPress: () => navigation.navigate('Login') },
         ]);
+      } else {
+        Alert.alert('Error', error.message || 'Failed to create account.');
       }
     } finally {
       setLoading(false);
@@ -55,59 +56,75 @@ const SignupTwo = ({ route, navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <StatusBar barStyle="light-content" />
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <StatusBar style="light" />
       <View style={styles.logo}>
-        <Avatar size={120} rounded source={require('../assets/splash.png')} />
+        <Avatar.Image size={120} rounded source={require('../assets/splash.png')} />
       </View>
 
       <View style={styles.words}>
-        <Text style={styles.title}>Create New Account</Text>
-        <Text>First Name: {firstName}</Text>
-        <Text>Last Name: {lastName}</Text>
-        <Text>Phone Number: {num}</Text>
+        <Text style={[styles.title, { color: theme.colors.onBackground }]}>
+          Create New Account
+        </Text>
+        <Text style={{ color: theme.colors.onBackground }}>First Name: {firstName}</Text>
+        <Text style={{ color: theme.colors.onBackground }}>Last Name: {lastName}</Text>
+        <Text style={{ color: theme.colors.onBackground }}>Phone Number: {num}</Text>
       </View>
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize='none'
-          style={styles.input}
-          placeholder="Email"
-          keyboardType="email-address"
-        />
-      </View>
+      <TextInput
+        mode="outlined"
+        label="Email"
+        value={email}
+        onChangeText={setEmail}
+        autoCapitalize="none"
+        keyboardType="email-address"
+        style={styles.input}
+        returnKeyType="next"
+      />
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize='none'
-          style={styles.input}
-          placeholder="Username"
-        />
-      </View>
+      <TextInput
+        mode="outlined"
+        label="Username"
+        value={username}
+        onChangeText={setUsername}
+        autoCapitalize="none"
+        style={styles.input}
+        returnKeyType="next"
+      />
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          value={password}
-          style={styles.input}
-          secureTextEntry={true}
-          onChangeText={setPassword}
-          placeholder="Password"
-        />
-      </View>
+      <TextInput
+        mode="outlined"
+        label="Password"
+        value={password}
+        onChangeText={setPassword}
+        secureTextEntry
+        style={styles.input}
+        returnKeyType="done"
+      />
 
-      <TouchableOpacity onPress={register} disabled={loading}>
-        <View style={styles.loginButton}>
-          <Text style={styles.loginText}>{loading ? 'Creating Account...' : 'Create Account'}</Text>
-        </View>
-      </TouchableOpacity>
+      <Button
+        mode="contained"
+        onPress={register}
+        loading={loading}
+        disabled={loading || !email || !password}
+        style={styles.loginButton}
+        contentStyle={{ paddingVertical: 10 }}
+      >
+        Create Account
+      </Button>
 
-      <TouchableOpacity onPress={() => navigation.goBack()} disabled={loading}>
-        <Text style={styles.signUpText}>Back</Text>
-      </TouchableOpacity>
+      <Button
+        mode="text"
+        onPress={() => navigation.goBack()}
+        disabled={loading}
+        labelStyle={{ color: theme.colors.primary, fontWeight: 'bold' }}
+        style={{ marginTop: 10 }}
+      >
+        Back
+      </Button>
     </KeyboardAvoidingView>
   );
 };
@@ -118,7 +135,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#FAF0E6', // Background color for the entire screen
   },
   logo: {
     marginBottom: 30,
@@ -126,48 +142,21 @@ const styles = StyleSheet.create({
   words: {
     marginTop: 20,
     marginBottom: 20,
+    alignItems: 'center',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center', // Center the text
-  },
-  inputContainer: {
-    width: '80%', // Full width of the container for better alignment
-    marginBottom: 20,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   input: {
-    width: '100%', // Full width to make it responsive
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFF',
+    width: '80%',
+    marginBottom: 16,
   },
   loginButton: {
-    width: '80%', // Match input field width
-    backgroundColor: '#3B5998', // Facebook blue color
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+    width: '80%',
     marginTop: 20,
-  },
-  loginText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  signUpText: {
-    color: '#3B5998',
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  forgotPasswordText: {
-    color: '#3B5998',
-    marginTop: 5,
-    textDecorationLine: 'underline', // Underline for a link effect
   },
 });
 
