@@ -1,70 +1,95 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import React, { useState } from 'react';
-import { Avatar } from '@rneui/themed';
+import { StatusBar } from 'expo-status-bar';
+import { KeyboardAvoidingView, Platform, View, StyleSheet } from 'react-native';
+import {
+  Avatar,
+  TextInput,
+  Button,
+  Text,
+  useTheme,
+} from 'react-native-paper';
 
+const Signup = ({ navigation }) => {
+  const [num, setNum] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const theme = useTheme();
 
-const Signup = ({navigation}) => {
-    const [num, setNum] = useState('');
-    const [firstName, setFirstName] = useState('');
-    const [lastName, setLastName] = useState('');
+  return (
+    <KeyboardAvoidingView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <StatusBar style="light" />
+      <View style={styles.logo}>
+        <Avatar.Image
+          size={120}
+          rounded
+          source={require('../assets/splash.png')}
+        />
+      </View>
 
-    return(
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        <StatusBar barStyle="light-content" />
-        <View style={styles.logo}>
-          <Avatar
-            size={120}
-            rounded
-            source={require('../assets/splash.png')}
-          />
-        </View>
+      <View style={styles.words}>
+        <Text style={[styles.title, { color: theme.colors.onBackground }]}>
+          Create New Account
+        </Text>
+      </View>
 
-        <View style={styles.words}>
-          <Text style={styles.title}>Create New Account</Text>
-        </View>
+      {/* First Name */}
+      <TextInput
+        mode="outlined"
+        label="First Name"
+        value={firstName}
+        onChangeText={setFirstName}
+        style={styles.input}
+        autoCapitalize="words"
+        returnKeyType="next"
+      />
 
-        {/* First Name */}
-        <View style={styles.inputContainer}>
-          <TextInput 
-            style={styles.input} 
-            value={firstName} 
-            placeholder='First Name'
-            onChangeText={firstName => setFirstName(firstName)}    
-          />
-            
-        </View>
+      {/* Last Name */}
+      <TextInput
+        mode="outlined"
+        label="Last Name"
+        value={lastName}
+        onChangeText={setLastName}
+        style={styles.input}
+        autoCapitalize="words"
+        returnKeyType="next"
+      />
 
-        {/* Last Name */}
-        <View style={styles.inputContainer}>
-          <TextInput 
-            style={styles.input} 
-            value={lastName} 
-            placeholder='Last Name'
-            onChangeText={lastName => setLastName(lastName)}
-          />
-        </View>
+      {/* Phone Number */}
+      <TextInput
+        mode="outlined"
+        label="Phone Number"
+        value={num}
+        onChangeText={setNum}
+        keyboardType="phone-pad"
+        style={styles.input}
+        returnKeyType="done"
+      />
 
-        <View style={styles.inputContainer}>
-          <TextInput 
-            value={num}
-            onChangeText={setNum}
-            style={styles.input}
-            placeholder="phone number"
-            keyboardType="number-pad"
-            // keyboardAppearance='dark'
-          />
-        </View>
+      <Button
+        mode="contained"
+        onPress={() =>
+          navigation.navigate('SignupTwo', { firstName, lastName, num })
+        }
+        style={styles.loginButton}
+        contentStyle={{ paddingVertical: 10 }}
+        disabled={!firstName || !lastName || !num}
+      >
+        Next
+      </Button>
 
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("SignupTwo", {firstName: firstName,lastName: lastName,num: num})}>
-          <Text style={styles.loginText}> Next </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.signUpText}>Back</Text>
-        </TouchableOpacity>
-      </KeyboardAvoidingView>
-    );
+      <Button
+        mode="text"
+        onPress={() => navigation.goBack()}
+        labelStyle={{ color: theme.colors.primary, fontWeight: 'bold' }}
+        style={{ marginTop: 10 }}
+      >
+        Back
+      </Button>
+    </KeyboardAvoidingView>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -73,7 +98,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 15,
-    backgroundColor: '#FAF0E6', // Background color for the entire screen
   },
   logo: {
     marginBottom: 30,
@@ -85,44 +109,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
-    textAlign: 'center', // Center the text
-  },
-  inputContainer: {
-    width: '80%', // Full width of the container for better alignment
-    marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
-    width: '100%', // Full width to make it responsive
-    height: 50,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    backgroundColor: '#FFF',
+    width: '80%',
+    marginBottom: 16,
   },
   loginButton: {
-    width: '80%', // Match input field width
-    backgroundColor: '#3B5998', // Facebook blue color
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
+    width: '80%',
     marginTop: 20,
-  },
-  loginText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
-  signUpText: {
-    color: '#3B5998',
-    fontWeight: 'bold',
-    marginTop: 10,
-  },
-  forgotPasswordText: {
-    color: '#3B5998',
-    marginTop: 5,
-    textDecorationLine: 'underline', // Underline for a link effect
   },
 });
 
